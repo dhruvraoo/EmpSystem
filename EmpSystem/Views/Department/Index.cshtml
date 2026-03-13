@@ -1,35 +1,380 @@
 @model IEnumerable<EmpSystem.ViewModel.DepartmentViewModal>
 @{
-    ViewData["Title"] = "All Employees";
+    ViewData["Title"] = "All Departments";
 }
- 
-<div class="container p-4">
-    <div class="row">
-        <div class="col-md-12">
-            <h3 class="p-4">All Departments</h3>
+
+<style>
+    .page-header {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 20px 24px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .page-header h4 {
+        font-weight: 700;
+        color: #1e2a3a;
+        margin: 0;
+        font-size: 1.05rem;
+    }
+
+    .page-header p {
+        color: #94a3b8;
+        margin: 0;
+        font-size: 0.78rem;
+    }
+
+    .btn-add {
+        background: #4f8ef7;
+        color: #fff;
+        border: none;
+        border-radius: 9px;
+        padding: 10px 20px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        text-decoration: none;
+        transition: background 0.2s, transform 0.1s;
+        white-space: nowrap;
+    }
+
+    .btn-add:hover {
+        background: #3b7de8;
+        color: #fff;
+        transform: translateY(-1px);
+    }
+
+    .table-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    .table-toolbar {
+        padding: 16px 20px;
+        border-bottom: 1px solid #f0f4f8;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .search-box {
+        position: relative;
+        flex: 1;
+        max-width: 280px;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 0.85rem;
+        pointer-events: none;
+    }
+
+    .search-box input {
+        padding: 9px 12px 9px 34px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 9px;
+        font-size: 0.82rem;
+        width: 100%;
+        color: #1a202c;
+        background: #fafbfc;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+    .search-box input:focus {
+        border-color: #4f8ef7;
+        background: #fff;
+    }
+
+    .table-count {
+        font-size: 0.78rem;
+        color: #94a3b8;
+        white-space: nowrap;
+    }
+
+    .table-count span {
+        font-weight: 700;
+        color: #1e2a3a;
+    }
+
+    /* Table */
+    .dept-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.82rem;
+    }
+
+    .dept-table thead th {
+        background: #f8fafc;
+        color: #64748b;
+        font-weight: 600;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        padding: 12px 16px;
+        border-bottom: 1px solid #e2e8f0;
+        white-space: nowrap;
+    }
+
+    .dept-table tbody tr {
+        border-bottom: 1px solid #f0f4f8;
+        transition: background 0.15s;
+    }
+
+    .dept-table tbody tr:last-child { border-bottom: none; }
+    .dept-table tbody tr:hover { background: #f8fafc; }
+
+    .dept-table td {
+        padding: 14px 16px;
+        color: #374151;
+        vertical-align: middle;
+    }
+
+    .sr-badge {
+        width: 28px; height: 28px;
+        background: #f0f4f8;
+        border-radius: 7px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #64748b;
+    }
+
+    /* Department icon pill */
+    .dept-cell {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .dept-icon {
+        width: 36px; height: 36px;
+        border-radius: 9px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.95rem;
+        flex-shrink: 0;
+    }
+
+    .dept-name {
+        font-weight: 600;
+        color: #1e2a3a;
+        font-size: 0.875rem;
+    }
+
+    .dept-id {
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    /* Employee count badge */
+    .emp-count-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        background: rgba(79,142,247,0.08);
+        color: #4f8ef7;
+    }
+
+    /* Action buttons */
+    .action-btn {
+        width: 32px; height: 32px;
+        border: none;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .btn-edit   { background: rgba(79,142,247,0.1); color: #4f8ef7; }
+    .btn-edit:hover   { background: #4f8ef7; color: #fff; }
+    .btn-delete { background: rgba(239,68,68,0.1);  color: #ef4444; }
+    .btn-delete:hover { background: #ef4444; color: #fff; }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #94a3b8;
+    }
+
+    .empty-state i {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+        display: block;
+        opacity: 0.4;
+    }
+
+    .empty-state p { font-size: 0.875rem; margin: 0; }
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div>
+        <h4><i class="bi bi-diagram-3 me-2" style="color:#4f8ef7;"></i>All Departments</h4>
+        <p>Manage and organise your company departments</p>
+    </div>
+    <a asp-controller="Department" asp-action="Add" class="btn-add">
+        <i class="bi bi-building-add"></i> Add Department
+    </a>
+</div>
+
+<!-- Table Card -->
+<div class="table-card">
+
+    <!-- Toolbar -->
+    <div class="table-toolbar">
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" id="searchInput" placeholder="Search departments..."/>
+        </div>
+        <div class="table-count">
+            <span id="rowCount">@Model.Count()</span> departments total
         </div>
     </div>
-    <div class="row">
-        <div class="col-md-12 p-4">
-            <table class="table">
-                <thead>
+
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="dept-table" id="deptTable">
+            <thead>
                 <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Department Name</th>
+                    <th style="width:60px;">Sr.</th>
+                    <th>Department</th>
+                    <th>Employees</th>
+                    <th style="text-align:center; width:100px;">Actions</th>
                 </tr>
-                </thead>
-                <tbody>
-                @foreach (var department in Model)
+            </thead>
+            <tbody>
+                @if (!Model.Any())
                 {
                     <tr>
-                        <td>@department.DepartmentId</td>
-                        <td>@department.DepartmentName</td>
-                        <td><a class="btn btn-dark">Edit</a></td>
-                        <td><a class="btn btn-danger">Delete</a></td>
+                        <td colspan="4">
+                            <div class="empty-state">
+                                <i class="bi bi-diagram-3"></i>
+                                <p>No departments yet. <a asp-action="Add" asp-controller="Department" style="color:#4f8ef7;">Create your first one.</a></p>
+                            </div>
+                        </td>
                     </tr>
                 }
-                </tbody>
-            </table>
+                else
+                {
+                    var colors = new[] {
+                        ("#4f8ef7", "rgba(79,142,247,0.1)"),
+                        ("#10b981", "rgba(16,185,129,0.1)"),
+                        ("#f59e0b", "rgba(245,158,11,0.1)"),
+                        ("#8b5cf6", "rgba(139,92,246,0.1)"),
+                        ("#ec4899", "rgba(236,72,153,0.1)"),
+                        ("#06b6d4", "rgba(6,182,212,0.1)"),
+                        ("#ef4444", "rgba(239,68,68,0.1)")
+                    };
+
+                    var icons = new[] {
+                        "bi-briefcase", "bi-pc-display", "bi-bar-chart",
+                        "bi-shield-check", "bi-megaphone", "bi-tools", "bi-cart"
+                    };
+
+                    int i = 1;
+                    foreach (var dept in Model)
+                    {
+                        var (iconColor, iconBg) = colors[(i - 1) % colors.Length];
+                        var icon = icons[(i - 1) % icons.Length];
+
+                        <tr>
+                            <td><span class="sr-badge">@i</span></td>
+                            <td>
+                                <div class="dept-cell">
+                                    <div class="dept-icon" style="background:@iconBg; color:@iconColor;">
+                                        <i class="bi @icon"></i>
+                                    </div>
+                                    <div>
+                                        <div class="dept-name">@dept.DepartmentName</div>
+                                        <div class="dept-id">ID #@dept.DepartmentId</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="emp-count-badge">
+                                    <i class="bi bi-people"></i>
+                                    @(1 > 0 ? 1 + " employees" : "No employees")
+                                </span>
+                            </td>
+                            <td style="text-align:center;">
+                                <div class="d-flex gap-2 justify-content-center">
+                                    <a asp-action="Edit" asp-controller="Department"
+                                       asp-route-id="@dept.DepartmentId"
+                                       class="action-btn btn-edit" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-controller="Department"
+                                       asp-route-id="@dept.DepartmentId"
+                                       class="action-btn btn-delete" title="Delete"
+                                       onclick="return confirm('Delete @dept.DepartmentName? This cannot be undone.')">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        i++;
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Footer -->
+    <div class="d-flex justify-content-between align-items-center px-4 py-3"
+         style="border-top: 1px solid #f0f4f8;">
+        <div style="font-size:0.78rem; color:#94a3b8;">
+            Showing <strong style="color:#1e2a3a;" id="footerCount">@Model.Count()</strong> departments
         </div>
+        <a asp-controller="Department" asp-action="Add" class="btn-add" style="padding:8px 16px; font-size:0.78rem;">
+            <i class="bi bi-plus-lg"></i> New Department
+        </a>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        const input     = document.getElementById('searchInput');
+        const rows      = document.querySelectorAll('#deptTable tbody tr');
+        const rowCount  = document.getElementById('rowCount');
+        const footCount = document.getElementById('footerCount');
+
+        input.addEventListener('input', function () {
+            const q = this.value.toLowerCase();
+            let visible = 0;
+            rows.forEach(row => {
+                const match = row.textContent.toLowerCase().includes(q);
+                row.style.display = match ? '' : 'none';
+                if (match) visible++;
+            });
+            rowCount.textContent  = visible;
+            footCount.textContent = visible;
+        });
+    </script>
+}

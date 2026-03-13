@@ -1,62 +1,545 @@
-@model IEnumerable<EmpSystem.ViewModel.EmployeeViewModal>
+@model PaginatedList<EmpSystem.ViewModel.EmployeeViewModal>;
 @{
     ViewData["Title"] = "All Employees";
 }
- 
-<div class="container p-4">
-    <div class="row">
-        <div class="col-md-12">
-            <h3 class="p-4">All Employees</h3>
+
+<style>
+    .page-header {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 20px 24px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .page-header h4 {
+        font-weight: 700;
+        color: #1e2a3a;
+        margin: 0;
+        font-size: 1.05rem;
+    }
+
+    .page-header p {
+        color: #94a3b8;
+        margin: 0;
+        font-size: 0.78rem;
+    }
+
+    .btn-add {
+        background: #4f8ef7;
+        color: #fff;
+        border: none;
+        border-radius: 9px;
+        padding: 10px 20px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        text-decoration: none;
+        transition: background 0.2s, transform 0.1s;
+        white-space: nowrap;
+    }
+
+    .btn-add:hover {
+        background: #3b7de8;
+        color: #fff;
+        transform: translateY(-1px);
+    }
+
+    .table-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    .table-toolbar {
+        padding: 16px 20px;
+        border-bottom: 1px solid #f0f4f8;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .search-box {
+        position: relative;
+        flex: 1;
+        max-width: 300px;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 0.85rem;
+        pointer-events: none;
+    }
+
+    .search-box input {
+        padding: 9px 12px 9px 34px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 9px 0 0 9px;
+        font-size: 0.82rem;
+        width: 100%;
+        color: #1a202c;
+        background: #fafbfc;
+        outline: none;
+        transition: border-color 0.2s;
+        height: 38px;
+    }
+
+    .search-box input:focus {
+        border-color: #4f8ef7;
+        background: #fff;
+    }
+
+    .btn-search {
+        background: #1e2a3a;
+        color: #fff;
+        border: none;
+        border-radius: 0 9px 9px 0;
+        padding: 0 16px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        height: 38px;
+        cursor: pointer;
+        transition: background 0.2s;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-search:hover { background: #2d3f55; }
+
+    .btn-reset {
+        background: #f0f4f8;
+        color: #64748b;
+        border: none;
+        border-radius: 9px;
+        padding: 0 14px;
+        font-size: 0.82rem;
+        font-weight: 500;
+        height: 38px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: background 0.2s;
+    }
+
+    .btn-reset:hover { background: #e2e8f0; color: #374151; }
+
+    .table-count {
+        font-size: 0.78rem;
+        color: #94a3b8;
+        white-space: nowrap;
+    }
+
+    .table-count span {
+        font-weight: 700;
+        color: #1e2a3a;
+    }
+
+    /* Table */
+    .emp-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.82rem;
+    }
+
+    .emp-table thead th {
+        background: #f8fafc;
+        color: #64748b;
+        font-weight: 600;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        padding: 12px 16px;
+        border-bottom: 1px solid #e2e8f0;
+        white-space: nowrap;
+    }
+
+    .emp-table thead th a {
+        color: #64748b;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        transition: color 0.2s;
+    }
+
+    .emp-table thead th a:hover { color: #4f8ef7; }
+
+    .emp-table tbody tr {
+        border-bottom: 1px solid #f0f4f8;
+        transition: background 0.15s;
+    }
+
+    .emp-table tbody tr:last-child { border-bottom: none; }
+    .emp-table tbody tr:hover { background: #f8fafc; }
+
+    .emp-table td {
+        padding: 13px 16px;
+        color: #374151;
+        vertical-align: middle;
+    }
+
+    .sr-badge {
+        width: 28px; height: 28px;
+        background: #f0f4f8;
+        border-radius: 7px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #64748b;
+    }
+
+    .emp-avatar {
+        width: 34px; height: 34px;
+        border-radius: 9px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #fff;
+        flex-shrink: 0;
+        margin-right: 9px;
+    }
+
+    .name-cell { display: flex; align-items: center; }
+    .full-name { font-weight: 600; color: #1e2a3a; line-height: 1.2; }
+    .emp-email { font-size: 0.72rem; color: #94a3b8; }
+
+    .gender-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.72rem;
+        font-weight: 600;
+    }
+
+    .gender-male   { background: rgba(79,142,247,0.1);  color: #4f8ef7; }
+    .gender-female { background: rgba(236,72,153,0.1);  color: #ec4899; }
+    .gender-other  { background: rgba(148,163,184,0.1); color: #64748b; }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.72rem;
+        font-weight: 600;
+    }
+
+    .status-active   { background: rgba(16,185,129,0.1); color: #10b981; }
+    .status-inactive { background: rgba(239,68,68,0.1);  color: #ef4444; }
+
+    .status-dot {
+        width: 6px; height: 6px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .status-active .status-dot   { background: #10b981; }
+    .status-inactive .status-dot { background: #ef4444; }
+
+    .action-btn {
+        width: 32px; height: 32px;
+        border: none;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .btn-edit   { background: rgba(79,142,247,0.1); color: #4f8ef7; }
+    .btn-edit:hover   { background: #4f8ef7; color: #fff; }
+    .btn-delete { background: rgba(239,68,68,0.1);  color: #ef4444; }
+    .btn-delete:hover { background: #ef4444; color: #fff; }
+
+    .truncate {
+        max-width: 130px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+    }
+
+    /* Pagination */
+    .pagination .page-link {
+        border: 1.5px solid #e2e8f0;
+        border-radius: 8px !important;
+        margin: 0 2px;
+        color: #374151;
+        font-size: 0.8rem;
+        font-weight: 500;
+        padding: 6px 13px;
+        transition: all 0.2s;
+    }
+
+    .pagination .page-link:hover {
+        background: #f0f4f8;
+        border-color: #cbd5e1;
+        color: #1e2a3a;
+    }
+
+    .pagination .page-item.active .page-link {
+        background: #4f8ef7;
+        border-color: #4f8ef7;
+        color: #fff;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        background: #fafbfc;
+        color: #cbd5e1;
+        border-color: #f0f4f8;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #94a3b8;
+    }
+
+    .empty-state i {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+        display: block;
+        opacity: 0.4;
+    }
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div>
+        <h4><i class="bi bi-people me-2" style="color:#4f8ef7;"></i>All Employees</h4>
+        <p>Manage and view all registered employees</p>
+    </div>
+    <a asp-action="Add" asp-controller="Employee" class="btn-add">
+        <i class="bi bi-person-plus"></i> Add Employee
+    </a>
+</div>
+
+<!-- Table Card -->
+<div class="table-card">
+
+    <!-- Toolbar -->
+    <div class="table-toolbar">
+        <form asp-action="Index" asp-controller="Employee" class="d-flex align-items-center gap-2 flex-wrap">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input name="searchString" type="search"
+                       placeholder="Search by name..."
+                       value="@ViewData["CurrentFilter"]"/>
+            </div>
+            <button type="submit" class="btn-search">
+                <i class="bi bi-search"></i> Search
+            </button>
+            <a asp-action="Index" asp-controller="Employee" class="btn-reset">
+                <i class="bi bi-x-circle"></i> Reset
+            </a>
+        </form>
+
+        <div class="table-count">
+            Page <span>@Model.PageIndex</span> of <span>@Model.TotalPages</span>
+            &nbsp;&middot;&nbsp; <span>@Model.Items.Count</span> employees total
         </div>
     </div>
-    <div class="row">
-        <div class="col-md-6">
-            <form class="d-flex" asp-action="Index" asp-controller="Employee">
-                <input name="searchString" class="form-control me-1" type="search" placeholder="Search" area-label="Search"/>
-                <button class="btn btn-dark" type="submit">Search by Name</button>
-            </form>
-        </div>
-        <div class="col-md-6">
-            <a asp-action="Index" class="text-dark">Back to Full List</a>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12 p-4">
-            <table class="table">
-                <thead>
+
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="emp-table">
+            <thead>
                 <tr>
-                    <th scope="col">#</th>
-                    <th scope="col"><a class="text-dark" asp-controller="Employee" asp-action="Index" asp-route-sortOrder=@ViewData["NameSortParam"] asp-route-currentFilter="@ViewData["CurrentFilter"]">FirstName</a></th>
-                    <th scope="col">LastName</th>
-                    <th scope="col"><a asp-action="Index" asp-route-sortOrder="@ViewData["DateOfBirthSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]" class="text-dark">DateOfBirth</a></th>
-                    <th scope="col">Gender</th>
-                    <th scope="col">Email</th>
-                    <th scope="col">PhoneNumber</th>
-                    <th scope="col">Address</th>
-                    <th scope="col"><a asp-action="Index" asp-route-sortOrder="@ViewData["IsActiveSortParam"]" asp-route-currentFilter="@ViewData["CurrentFilter"]" class="text-dark">IsActive</a></th>
-                    <th></th>
-                    <th></th>
+                    <th>Sr.</th>
+                    <th>
+                        <a asp-action="Index" asp-controller="Employee"
+                           asp-route-sortOrder="@ViewData["NameSortParam"]"
+                           asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                            Employee <i class="bi bi-arrow-down-up" style="font-size:0.65rem;"></i>
+                        </a>
+                    </th>
+                    <th>
+                        <a asp-action="Index"
+                           asp-route-sortOrder="@ViewData["DateOfBirthSortParm"]"
+                           asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                            Date of Birth <i class="bi bi-arrow-down-up" style="font-size:0.65rem;"></i>
+                        </a>
+                    </th>
+                    <th>Gender</th>
+                    <th>Phone</th>
+                    <th>Address</th>
+                    <th>
+                        <a asp-action="Index"
+                           asp-route-sortOrder="@ViewData["IsActiveSortParam"]"
+                           asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                            Status <i class="bi bi-arrow-down-up" style="font-size:0.65rem;"></i>
+                        </a>
+                    </th>
+                    <th style="text-align:center;">Actions</th>
                 </tr>
-                </thead>
-                <tbody>
-                @foreach (var employee in Model)
+            </thead>
+            <tbody>
+                @if (!Model.Items.Any())
                 {
                     <tr>
-                        <td>@employee.EmployeeId</td>
-                        <td>@employee.FirstName</td>
-                        <td>@employee.LastName</td>
-                        <td>@employee.DateOfBirth</td>
-                        <td>@employee.Gender</td>
-                        <td>@employee.Email</td>
-                        <td>@employee.PhoneNumber</td>
-                        <td>@employee.Address</td>
-                        <td>@employee.IsActive</td>                        
-                        <td><a class="btn btn-dark" asp-controller="Employee" asp-action="Edit" asp-route-id="@employee.EmployeeId">Edit</a></td>
-                        <td><a class="btn btn-danger" asp-action="Delete" asp-controller="Employee" asp-route-id="@employee.EmployeeId" onclick="return confirm('Are you sure want to delete this employee ?')">Delete</a></td>
+                        <td colspan="8">
+                            <div class="empty-state">
+                                <i class="bi bi-people"></i>
+                                <p>No employees found. <a asp-action="Create" asp-controller="Employee" style="color:#4f8ef7;">Add your first one.</a></p>
+                            </div>
+                        </td>
                     </tr>
                 }
-                </tbody>
-            </table>
-        </div>
+                else
+                {
+                    var colors = new[] { "#4f8ef7","#10b981","#f59e0b","#ec4899","#8b5cf6","#ef4444","#06b6d4" };
+                    int sr = (Model.PageIndex - 1) * Model.PageSize + 1;
+
+                    foreach (var emp in Model.Items)
+                    {
+                        var color    = colors[Math.Abs(((emp.FirstName ?? "") + (emp.LastName ?? "")).GetHashCode()) % colors.Length];
+                        var initials = $"{emp.FirstName?.FirstOrDefault()}{emp.LastName?.FirstOrDefault()}".ToUpper();
+                        var gClass   = emp.Gender == "Male" ? "gender-male" : emp.Gender == "Female" ? "gender-female" : "gender-other";
+                        var gIcon    = emp.Gender == "Male" ? "bi-gender-male" : emp.Gender == "Female" ? "bi-gender-female" : "bi-gender-ambiguous";
+
+                        <tr>
+                            <td><span class="sr-badge">@sr</span></td>
+                            <td>
+                                <div class="name-cell">
+                                    <div class="emp-avatar" style="background:@color;">@initials</div>
+                                    <div>
+                                        <div class="full-name">@emp.FirstName @emp.LastName</div>
+                                        <div class="emp-email">@emp.Email</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>@emp.DateOfBirth.ToString("MMM dd, yyyy")</td>
+                            <td>
+                                <span class="gender-badge @gClass">
+                                    <i class="bi @gIcon"></i> @emp.Gender
+                                </span>
+                            </td>
+                            <td>@emp.PhoneNumber</td>
+                            <td><span class="truncate" title="@emp.Address">@emp.Address</span></td>
+                            <td>
+                                @if (emp.IsActive)
+                                {
+                                    <span class="status-badge status-active">
+                                        <span class="status-dot"></span> Active
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge status-inactive">
+                                        <span class="status-dot"></span> Inactive
+                                    </span>
+                                }
+                            </td>
+                            <td style="text-align:center;">
+                                <div class="d-flex gap-2 justify-content-center">
+                                    <a asp-action="Edit" asp-controller="Employee"
+                                       asp-route-id="@emp.EmployeeId"
+                                       class="action-btn btn-edit" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-controller="Employee"
+                                       asp-route-id="@emp.EmployeeId"
+                                       class="action-btn btn-delete" title="Delete"
+                                       onclick="return confirm('Delete @emp.FirstName @emp.LastName? This cannot be undone.')">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        sr++;
+                    }
+                }
+            </tbody>
+        </table>
     </div>
-</div>;
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-between align-items-center px-4 py-3 border-top" style="border-color:#f0f4f8!important;">
+        <div style="font-size:0.78rem; color:#94a3b8;">
+            Showing
+            <strong style="color:#1e2a3a;">@((Model.PageIndex - 1) * Model.PageSize + 1)</strong>
+            –
+            <strong style="color:#1e2a3a;">@(Math.Min(Model.PageIndex * Model.PageSize, Model.Items.Count))</strong>
+            of <strong style="color:#1e2a3a;">@Model.Items.Count</strong> results
+        </div>
+
+        <nav>
+            <ul class="pagination mb-0">
+                <!-- First -->
+                <li class="page-item @(Model.PageIndex == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-pageNumber="1"
+                       asp-route-sortOrder="@ViewData["CurrentSort"]"
+                       asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                        <i class="bi bi-chevron-double-left"></i>
+                    </a>
+                </li>
+                <!-- Previous -->
+                <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-pageNumber="@(Model.PageIndex - 1)"
+                       asp-route-sortOrder="@ViewData["CurrentSort"]"
+                       asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+
+                @for (int p = Math.Max(1, Model.PageIndex - 2); p <= Math.Min(Model.TotalPages, Model.PageIndex + 2); p++)
+                {
+                    <li class="page-item @(Model.PageIndex == p ? "active" : "")">
+                        <a class="page-link" asp-action="Index"
+                           asp-route-pageNumber="@p"
+                           asp-route-sortOrder="@ViewData["CurrentSort"]"
+                           asp-route-currentFilter="@ViewData["CurrentFilter"]">@p</a>
+                    </li>
+                }
+
+                <!-- Next -->
+                <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-pageNumber="@(Model.PageIndex + 1)"
+                       asp-route-sortOrder="@ViewData["CurrentSort"]"
+                       asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                <!-- Last -->
+                <li class="page-item @(Model.PageIndex == Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-pageNumber="@Model.TotalPages"
+                       asp-route-sortOrder="@ViewData["CurrentSort"]"
+                       asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                        <i class="bi bi-chevron-double-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+</div>

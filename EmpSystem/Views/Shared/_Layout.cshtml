@@ -251,55 +251,20 @@
             <i class="bi bi-house-door"></i> Home
         </a>
 
-        <!-- Employee -->
-        <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Employee" ? "" : "collapsed")"
-           data-bs-toggle="collapse" data-bs-target="#employeeMenu"
-           aria-expanded="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Employee" ? "true" : "false")">
-            <i class="bi bi-people"></i>
-            Employee
-            <i class="bi bi-chevron-right collapse-arrow"></i>
-        </a>
-        <div class="collapse @(ViewContext.RouteData.Values["controller"]?.ToString() == "Employee" ? "show" : "")" id="employeeMenu">
-            <ul class="sidebar-submenu">
-                <li>
-                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Employee" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")"
-                       asp-area="" asp-controller="Employee" asp-action="Index">
-                        <i class="bi bi-list-ul me-1"></i> List All
-                    </a>
-                </li>
-                <li>
-                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Employee" && ViewContext.RouteData.Values["action"]?.ToString() == "Create" ? "active" : "")"
-                       asp-area="" asp-controller="Employee" asp-action="Add">
-                        <i class="bi bi-person-plus me-1"></i> Add Employee
-                    </a>
-                </li>
-            </ul>
-        </div>
+  
+        
+
+            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Employee" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")"
+               asp-area="" asp-controller="Employee" asp-action="Index">
+                <i class="bi bi-people"></i> Employee
+            </a>
 
         <!-- Department -->
-        <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Department" ? "" : "collapsed")"
-           data-bs-toggle="collapse" data-bs-target="#departmentMenu"
-           aria-expanded="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Department" ? "true" : "false")">
-            <i class="bi bi-diagram-3"></i>
-            Department
-            <i class="bi bi-chevron-right collapse-arrow"></i>
+        <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Department" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")"
+           asp-area="" asp-controller="Department" asp-action="Index">
+            <i class="bi bi-diagram-3"></i> Department
         </a>
-        <div class="collapse @(ViewContext.RouteData.Values["controller"]?.ToString() == "Department" ? "show" : "")" id="departmentMenu">
-            <ul class="sidebar-submenu">
-                <li>
-                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Department" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")"
-                       asp-area="" asp-controller="Department" asp-action="Index">
-                        <i class="bi bi-list-ul me-1"></i> List All
-                    </a>
-                </li>
-                <li>
-                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Department" && ViewContext.RouteData.Values["action"]?.ToString() == "Add" ? "active" : "")"
-                       asp-area="" asp-controller="Department" asp-action="Add">
-                        <i class="bi bi-building-add me-1"></i> Add Department
-                    </a>
-                </li>
-            </ul>
-        </div>
+        
     </div>
 
     <div class="sidebar-footer">

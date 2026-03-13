@@ -6,7 +6,7 @@ namespace EmpSystem.Repository;
 public interface IEmployeeRepository
 {
     Task<EmployeeViewModal> GetByIdAsync(int id);
-    Task<List<EmployeeViewModal>> GetAllAsync();
+    IQueryable<EmployeeViewModal> GetAllAsync();
     Task AddAsync(EmployeeViewModal employee);
     Task UpdateAsync(EmployeeViewModal employee);
     Task DeleteAsync(int Id);

@@ -1,8 +1,449 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<style>
+    .welcome-banner {
+        background: #1e2a3a;
+        border-radius: 16px;
+        padding: 28px 32px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .welcome-banner::before {
+        content: '';
+        position: absolute;
+        top: -40px; right: -40px;
+        width: 200px; height: 200px;
+        background: rgba(79,142,247,0.1);
+        border-radius: 50%;
+    }
+
+    .welcome-banner::after {
+        content: '';
+        position: absolute;
+        bottom: -60px; right: 80px;
+        width: 150px; height: 150px;
+        background: rgba(79,142,247,0.06);
+        border-radius: 50%;
+    }
+
+    .welcome-text h3 {
+        color: #fff;
+        font-weight: 700;
+        font-size: 1.3rem;
+        margin: 0 0 6px;
+    }
+
+    .welcome-text p {
+        color: rgba(255,255,255,0.5);
+        margin: 0;
+        font-size: 0.85rem;
+    }
+
+    .welcome-date {
+        background: rgba(255,255,255,0.07);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 10px;
+        padding: 10px 18px;
+        text-align: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    .welcome-date .date-day {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #fff;
+        line-height: 1;
+    }
+
+    .welcome-date .date-month {
+        font-size: 0.72rem;
+        color: #4f8ef7;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Stat cards */
+    .stat-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 22px 24px;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        transition: box-shadow 0.2s, transform 0.2s;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .stat-card:hover {
+        box-shadow: 0 8px 24px rgba(30,42,58,0.1);
+        transform: translateY(-2px);
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .stat-icon {
+        width: 52px; height: 52px;
+        border-radius: 13px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.4rem;
+        flex-shrink: 0;
+    }
+
+    .stat-icon-blue   { background: rgba(79,142,247,0.12); color: #4f8ef7; }
+    .stat-icon-green  { background: rgba(16,185,129,0.12); color: #10b981; }
+    .stat-icon-amber  { background: rgba(245,158,11,0.12); color: #f59e0b; }
+    .stat-icon-purple { background: rgba(139,92,246,0.12); color: #8b5cf6; }
+
+    .stat-value {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #1e2a3a;
+        line-height: 1;
+        margin-bottom: 4px;
+    }
+
+    .stat-label {
+        font-size: 0.78rem;
+        color: #94a3b8;
+        font-weight: 500;
+    }
+
+    .stat-badge {
+        margin-left: auto;
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        align-self: flex-start;
+    }
+
+    .badge-blue   { background: rgba(79,142,247,0.1);  color: #4f8ef7; }
+    .badge-green  { background: rgba(16,185,129,0.1);  color: #10b981; }
+    .badge-amber  { background: rgba(245,158,11,0.1);  color: #f59e0b; }
+    .badge-purple { background: rgba(139,92,246,0.1);  color: #8b5cf6; }
+
+    /* Quick action cards */
+    .action-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 24px;
+        height: 100%;
+        transition: box-shadow 0.2s, transform 0.2s;
+    }
+
+    .action-card:hover {
+        box-shadow: 0 8px 24px rgba(30,42,58,0.08);
+        transform: translateY(-2px);
+    }
+
+    .action-card-icon {
+        width: 46px; height: 46px;
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.2rem;
+        margin-bottom: 14px;
+    }
+
+    .action-card h6 {
+        font-weight: 700;
+        color: #1e2a3a;
+        font-size: 0.95rem;
+        margin-bottom: 6px;
+    }
+
+    .action-card p {
+        font-size: 0.78rem;
+        color: #94a3b8;
+        margin-bottom: 18px;
+        line-height: 1.5;
+    }
+
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 9px 18px;
+        border-radius: 9px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-action-blue {
+        background: #4f8ef7;
+        color: #fff;
+    }
+
+    .btn-action-blue:hover {
+        background: #3b7de8;
+        color: #fff;
+        transform: translateY(-1px);
+    }
+
+    .btn-action-outline {
+        background: #f0f4f8;
+        color: #374151;
+    }
+
+    .btn-action-outline:hover {
+        background: #e2e8f0;
+        color: #1e2a3a;
+    }
+
+    /* Section title */
+    .section-title {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: #94a3b8;
+        margin-bottom: 14px;
+    }
+
+    /* Activity list */
+    .activity-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    .activity-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid #f0f4f8;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .activity-header h6 {
+        font-weight: 700;
+        color: #1e2a3a;
+        margin: 0;
+        font-size: 0.9rem;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 20px;
+        border-bottom: 1px solid #f8fafc;
+        transition: background 0.15s;
+    }
+
+    .activity-item:last-child { border-bottom: none; }
+    .activity-item:hover { background: #f8fafc; }
+
+    .activity-dot {
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .activity-text {
+        font-size: 0.8rem;
+        color: #374151;
+        flex: 1;
+    }
+
+    .activity-text strong { color: #1e2a3a; }
+
+    .activity-time {
+        font-size: 0.72rem;
+        color: #cbd5e1;
+        white-space: nowrap;
+    }
+</style>
+
+<!-- Welcome Banner -->
+<div class="welcome-banner">
+    <div class="welcome-text">
+        <h3>Welcome back, Admin 👋</h3>
+        <p>Here's what's happening in your HR system today.</p>
+    </div>
+    <div class="welcome-date">
+        <div class="date-day" id="dateDay"></div>
+        <div class="date-month" id="dateMonth"></div>
+    </div>
 </div>
+
+<!-- Stat Cards -->
+<div class="section-title">Overview</div>
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <a asp-controller="Employee" asp-action="Index" class="stat-card">
+            <div class="stat-icon stat-icon-blue">
+                <i class="bi bi-people"></i>
+            </div>
+            <div>
+                <div class="stat-value">@ViewBag.TotalEmployees</div>
+                <div class="stat-label">Total Employees</div>
+            </div>
+            <span class="stat-badge badge-blue ms-auto">
+                <i class="bi bi-arrow-right"></i> View
+            </span>
+        </a>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <a asp-controller="Department" asp-action="Index" class="stat-card">
+            <div class="stat-icon stat-icon-green">
+                <i class="bi bi-diagram-3"></i>
+            </div>
+            <div>
+                <div class="stat-value">@ViewBag.TotalDepartments</div>
+                <div class="stat-label">Departments</div>
+            </div>
+            <span class="stat-badge badge-green ms-auto">
+                <i class="bi bi-arrow-right"></i> View
+            </span>
+        </a>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-amber">
+                <i class="bi bi-person-check"></i>
+            </div>
+            <div>
+                <div class="stat-value">@ViewBag.ActiveEmployees</div>
+                <div class="stat-label">Active Employees</div>
+            </div>
+            <span class="stat-badge badge-amber ms-auto">
+                <i class="bi bi-dot"></i> Live
+            </span>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-purple">
+                <i class="bi bi-person-x"></i>
+            </div>
+            <div>
+                <div class="stat-value">@ViewBag.InactiveEmployees</div>
+                <div class="stat-label">Inactive Employees</div>
+            </div>
+            <span class="stat-badge badge-purple ms-auto">
+                <i class="bi bi-dash"></i> Off
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="section-title">Quick Actions</div>
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="action-card">
+            <div class="action-card-icon stat-icon-blue">
+                <i class="bi bi-person-plus" style="color:#4f8ef7;"></i>
+            </div>
+            <h6>Add Employee</h6>
+            <p>Register a new employee and assign them to a department.</p>
+            <a asp-controller="Employee" asp-action="Add" class="btn-action btn-action-blue">
+                <i class="bi bi-plus-lg"></i> Add Now
+            </a>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="action-card">
+            <div class="action-card-icon stat-icon-green">
+                <i class="bi bi-people" style="color:#10b981;"></i>
+            </div>
+            <h6>All Employees</h6>
+            <p>Browse, search, and manage your entire employee roster.</p>
+            <a asp-controller="Employee" asp-action="Index" class="btn-action btn-action-outline">
+                <i class="bi bi-arrow-right"></i> View List
+            </a>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="action-card">
+            <div class="action-card-icon stat-icon-amber">
+                <i class="bi bi-building-add" style="color:#f59e0b;"></i>
+            </div>
+            <h6>Add Department</h6>
+            <p>Create a new department and start assigning employees.</p>
+            <a asp-controller="Department" asp-action="Add" class="btn-action btn-action-blue">
+                <i class="bi bi-plus-lg"></i> Add Now
+            </a>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="action-card">
+            <div class="action-card-icon stat-icon-purple">
+                <i class="bi bi-diagram-3" style="color:#8b5cf6;"></i>
+            </div>
+            <h6>All Departments</h6>
+            <p>View and manage all departments across your organisation.</p>
+            <a asp-controller="Department" asp-action="Index" class="btn-action btn-action-outline">
+                <i class="bi bi-arrow-right"></i> View List
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="section-title">Recent Activity</div>
+<div class="activity-card">
+    <div class="activity-header">
+        <h6><i class="bi bi-clock-history me-2" style="color:#4f8ef7;"></i>Latest Updates</h6>
+        <a asp-controller="Employee" asp-action="Index"
+           style="font-size:0.78rem; color:#4f8ef7; text-decoration:none; font-weight:600;">
+            View all <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+
+    @if (ViewBag.RecentEmployees != null)
+    {
+        var colors = new[] { "#4f8ef7","#10b981","#f59e0b","#ec4899","#8b5cf6" };
+        int idx = 0;
+        foreach (var emp in ViewBag.RecentEmployees)
+        {
+            var color = colors[idx % colors.Length];
+            <div class="activity-item">
+                <div class="activity-dot" style="background:@color;"></div>
+                <div class="activity-text">
+                    <strong>@emp.FirstName @emp.LastName</strong> was added
+                    to <strong>@emp.DepartmentName</strong>
+                </div>
+                <div class="activity-time">@emp.DateOfBirth.ToString("MMM dd")</div>
+            </div>
+            idx++;
+        }
+    }
+    else
+    {
+        <div class="activity-item">
+            <div class="activity-dot" style="background:#e2e8f0;"></div>
+            <div class="activity-text" style="color:#94a3b8;">No recent activity to show.</div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Live date in welcome banner
+        const now = new Date();
+        document.getElementById('dateDay').textContent = now.getDate();
+        document.getElementById('dateMonth').textContent =
+            now.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    </script>
+}

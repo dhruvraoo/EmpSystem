@@ -16,40 +16,66 @@ public class EmployeeController: Controller
     {
         _employeeRepository = employeeRepository;
     }
-    public async Task<IActionResult> Index(string searchString, string sortOrder)
-    {
-        var employees = await _employeeRepository.GetAllAsync();
-        if (!string.IsNullOrEmpty(searchString))
+ public async Task<IActionResult> Index(string searchString, string sortOrder, int pageNumber, string currentFilter)
         {
-            employees = new List<EmployeeViewModal>(employees.Where(n => n.FirstName.Contains(searchString) || n.LastName.Contains(searchString)));
-        }
-        ViewData["NameSortParm"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
-        ViewData["DateOfBirthSortParm"] = sortOrder == "date_asc" ? "date_desc" : "date_asc";
-        ViewData["IsActiveSortParam"] = sortOrder == "isactive_asc" ? "isactive_desc" : "isactive_asc";
+            ViewData["CurrentSort"] = sortOrder;
+            //Sorting
+            ViewData["NameSortParam"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["DateOfBirthSortParm"] = sortOrder == "date_asc" ? "date_desc" : "date_asc";
+            ViewData["IsActiveSortParam"] = sortOrder == "isactive_asc" ? "isactive_desc" : "isactive_asc";
+            if (searchString != null)
+            {
+                pageNumber = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
 
-        switch (sortOrder)
-        {
-            case "name_desc": 
-                employees = new List<EmployeeViewModal>(employees.OrderByDescending(n => n.FirstName));
-                break;
-            case "date_asc":
-                employees = new List<EmployeeViewModal>(employees.OrderBy(s => s.DateOfBirth));
-                break;
-            case "date_desc":
-                employees = new List<EmployeeViewModal>(employees.OrderByDescending(s => s.DateOfBirth));
-                break;
-            case "isactive_desc":
-                employees = new List<EmployeeViewModal>(employees.OrderByDescending(e => e.IsActive));
-                break;
-            case "isactive_asc":
-                employees = new List<EmployeeViewModal>(employees.OrderBy(e => e.IsActive));
-                break;
-            default:
-                employees = employees.OrderBy(n => n.FirstName).ToList();
-                break;
+            ViewData["CurrentFilter"] = searchString;
+
+            var employees =  _employeeRepository.GetAllAsync();
+
+            // Search functionality
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                employees = employees.Where(e => e.FirstName.Contains(searchString) || e.LastName.Contains(searchString));
+            }
+
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    employees = employees.OrderByDescending(e => e.FirstName);
+                    break;
+
+                case "date_asc":
+                    employees = employees.OrderBy(s => s.DateOfBirth);
+                    break;
+                case "date_desc":
+                    employees = employees.OrderByDescending(s => s.DateOfBirth);
+                    break;
+                case "isactive_desc":
+                    employees = employees.OrderByDescending(e => e.IsActive);
+                    break;
+                case "isactive_asc":
+                    employees = employees.OrderBy(e => e.IsActive);
+                    break;
+
+                default:
+                    employees = employees.OrderBy(e => e.FirstName);
+                    break;
+            }
+
+            // Ensure pageNumber is at least 1
+            if (pageNumber < 1)
+            {
+                pageNumber = 1;
+            }
+
+            int pageSize = 5;
+            return View(await PaginatedList<EmployeeViewModal>.CreateAsync(employees, pageNumber, pageSize));
+
         }
-        return View(employees);
-    }
 
     [HttpGet]
     public async Task<IActionResult> Add()
