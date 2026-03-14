@@ -17,7 +17,7 @@ public class EmployeeRepository: IEmployeeRepository
         var employee = await _dbContext.Employees.FindAsync(id);
         var employeeViewModal = new EmployeeViewModal
         {
-            EmployeeId = employee.EmployeeId,
+            EmployeeId = employee!.EmployeeId,
             FirstName = employee.FirstName,
             LastName = employee.LastName,
             DateOfBirth = employee.DateOfBirth,
@@ -26,11 +26,13 @@ public class EmployeeRepository: IEmployeeRepository
             PhoneNumber = employee.PhoneNumber,
             Address = employee.Address,
             IsActive = employee.IsActive,
+            DepartmentId = employee.DepartmentId,
+            Role = employee.Role,
         };
         return employeeViewModal;
     }
 
-    public  IQueryable<EmployeeViewModal> GetAllAsync()
+    public IQueryable<EmployeeViewModal> GetAllAsync()
     {
         var employees = _dbContext.Employees.Select(e => new EmployeeViewModal
         {
@@ -44,6 +46,7 @@ public class EmployeeRepository: IEmployeeRepository
             Address = e.Address,
             IsActive = e.IsActive,
             DepartmentId = e.DepartmentId,
+            Role = e.Role,
         });
         return employees;
         // List<Employee> employees = await _dbContext.Employees.ToListAsync();
@@ -72,7 +75,7 @@ public class EmployeeRepository: IEmployeeRepository
 
     public async Task AddAsync(EmployeeViewModal employee)
     {
-        var newEmployee = new Employee()
+        var newEmployee = new Employee
         {
             FirstName = employee.FirstName,
             LastName = employee.LastName,
@@ -83,6 +86,7 @@ public class EmployeeRepository: IEmployeeRepository
             Address = employee.Address,
             IsActive = employee.IsActive,
             DepartmentId = employee.DepartmentId,
+            Role = employee.Role,
         };
         await _dbContext.Employees.AddAsync(newEmployee);
         await _dbContext.SaveChangesAsync();
@@ -91,6 +95,7 @@ public class EmployeeRepository: IEmployeeRepository
     public async Task UpdateAsync(EmployeeViewModal employeeUpdated)
     {
         var employee = await _dbContext.Employees.FindAsync(employeeUpdated.EmployeeId);
+        if (employee is null) return;
         employee.FirstName = employeeUpdated.FirstName;
         employee.LastName = employeeUpdated.LastName;
         employee.Email = employeeUpdated.Email;
@@ -98,7 +103,8 @@ public class EmployeeRepository: IEmployeeRepository
         employee.PhoneNumber = employeeUpdated.PhoneNumber;
         employee.Address = employeeUpdated.Address;
         employee.DepartmentId = employeeUpdated.DepartmentId;
-        employee.IsActive= employeeUpdated.IsActive;
+        employee.IsActive = employeeUpdated.IsActive;
+        employee.Role = employeeUpdated.Role;
         _dbContext.Employees.Update(employee);
         await _dbContext.SaveChangesAsync();
     }

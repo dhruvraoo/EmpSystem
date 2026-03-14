@@ -34,7 +34,11 @@ public class EmployeeViewModal
     [Required(ErrorMessage = "Address is required")]
     public string Address { get; set; }
     public bool IsActive { get; set; }
-    
+
+    [Required(ErrorMessage = "Role is required")]
+    [Display(Name = "Role")]
+    public string Role { get; set; } = "HR";
+
     [ForeignKey("Department")]
     public int DepartmentId { get; set; } //Foreign Key
     public Department? Department { get; set; } //Reference navigation property

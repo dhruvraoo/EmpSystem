@@ -1,0 +1,87 @@
+@model EmpSystem.ViewModel.LoginViewModel
+
+@{
+    ViewData["Title"] = "Login";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login — EmpSystem</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
+    <style>
+        body { background: #f0f4f8; font-family: 'DM Sans', sans-serif; }
+        .login-card { max-width: 420px; margin: 0 auto; }
+        .brand-name { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.5rem; }
+        .brand-sub  { font-size: 0.7rem; letter-spacing: 1.5px; text-transform: uppercase; color: #4f8ef7; }
+        .btn-primary { background: #4f8ef7; border-color: #4f8ef7; }
+        .btn-primary:hover { background: #3a7ae0; border-color: #3a7ae0; }
+    </style>
+</head>
+<body class="d-flex align-items-center justify-content-center min-vh-100">
+
+<div class="login-card w-100 px-3">
+    <div class="text-center mb-4">
+        <div class="brand-name text-dark">EmpSystem</div>
+        <div class="brand-sub">HR Management</div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4 p-md-5">
+            <h5 class="fw-bold mb-1">Welcome back</h5>
+            <p class="text-muted small mb-4">Sign in to your account</p>
+
+            <form asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger small" role="alert"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label fw-semibold small"></label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0">
+                            <i class="bi bi-envelope text-muted"></i>
+                        </span>
+                        <input asp-for="Email" class="form-control border-start-0 ps-0"
+                               placeholder="admin@empsystem.com" autocomplete="email" />
+                    </div>
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label fw-semibold small"></label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0">
+                            <i class="bi bi-lock text-muted"></i>
+                        </span>
+                        <input asp-for="Password" class="form-control border-start-0 ps-0"
+                               placeholder="••••••••" autocomplete="current-password" />
+                    </div>
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-4 form-check">
+                    <input asp-for="RememberMe" class="form-check-input" />
+                    <label asp-for="RememberMe" class="form-check-label small text-muted"></label>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 fw-semibold">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <p class="text-center text-muted small mt-3">
+        &copy; 2026 EmpSystem
+    </p>
+</div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>

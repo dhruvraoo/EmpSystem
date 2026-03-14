@@ -1,0 +1,50 @@
+@model EmpSystem.ViewModel.AttendanceViewModel
+
+@{
+    ViewData["Title"] = "Delete Attendance";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-5">
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-header bg-white py-3 px-4 border-bottom">
+                <h5 class="fw-bold text-danger mb-0">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Delete Attendance Record
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <p class="mb-4 text-muted">Are you sure you want to delete this attendance record? This action cannot be undone.</p>
+
+                <dl class="row">
+                    <dt class="col-sm-4">Employee</dt>
+                    <dd class="col-sm-8">@Model.EmployeeName</dd>
+
+                    <dt class="col-sm-4">Date</dt>
+                    <dd class="col-sm-8">@Model.Date.ToString("dd MMM yyyy")</dd>
+
+                    <dt class="col-sm-4">Status</dt>
+                    <dd class="col-sm-8">
+                        @{
+                            var badge = Model.Status switch
+                            {
+                                EmpSystem.Models.AttendanceStatus.Present => "success",
+                                EmpSystem.Models.AttendanceStatus.Absent  => "danger",
+                                EmpSystem.Models.AttendanceStatus.Leave   => "warning",
+                                _                                          => "secondary"
+                            };
+                        }
+                        <span class="badge text-bg-@badge rounded-pill px-3">@Model.Status</span>
+                    </dd>
+                </dl>
+
+                <form asp-action="Delete" method="post" class="d-flex gap-2 mt-3">
+                    <input type="hidden" asp-for="AttendanceId" />
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i>Yes, Delete
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

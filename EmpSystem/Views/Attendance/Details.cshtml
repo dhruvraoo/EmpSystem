@@ -1,0 +1,45 @@
+@model EmpSystem.ViewModel.AttendanceViewModel
+
+@{
+    ViewData["Title"] = "Attendance Details";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-5">
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-header bg-white py-3 px-4 border-bottom">
+                <h5 class="fw-bold mb-0"><i class="bi bi-calendar-check me-2"></i>Attendance Details</h5>
+            </div>
+            <div class="card-body p-4">
+                <dl class="row">
+                    <dt class="col-sm-4">Employee</dt>
+                    <dd class="col-sm-8 fw-semibold">@Model.EmployeeName</dd>
+
+                    <dt class="col-sm-4">Date</dt>
+                    <dd class="col-sm-8">@Model.Date.ToString("dd MMM yyyy")</dd>
+
+                    <dt class="col-sm-4">Status</dt>
+                    <dd class="col-sm-8">
+                        @{
+                            var badge = Model.Status switch
+                            {
+                                EmpSystem.Models.AttendanceStatus.Present => "success",
+                                EmpSystem.Models.AttendanceStatus.Absent  => "danger",
+                                EmpSystem.Models.AttendanceStatus.Leave   => "warning",
+                                _                                          => "secondary"
+                            };
+                        }
+                        <span class="badge text-bg-@badge rounded-pill px-3 py-1">@Model.Status</span>
+                    </dd>
+                </dl>
+
+                <div class="d-flex gap-2 mt-3">
+                    <a asp-action="Edit" asp-route-id="@Model.AttendanceId" class="btn btn-primary">
+                        <i class="bi bi-pencil me-1"></i>Edit
+                    </a>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

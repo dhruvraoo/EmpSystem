@@ -1,0 +1,84 @@
+@model IQueryable<EmpSystem.ViewModel.AttendanceViewModel>
+
+@{
+    ViewData["Title"] = "Attendance";
+}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h4 class="fw-bold mb-0">Attendance Records</h4>
+        <p class="text-muted small mb-0">Manage employee attendance</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i> Mark Attendance
+    </a>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="card shadow-sm border-0 rounded-3">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="px-4">Employee</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th class="text-end px-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="px-4 fw-semibold">@item.EmployeeName</td>
+                            <td>@item.Date.ToString("dd MMM yyyy")</td>
+                            <td>
+                                @{
+                                    var badge = item.Status switch
+                                    {
+                                        EmpSystem.Models.AttendanceStatus.Present => "success",
+                                        EmpSystem.Models.AttendanceStatus.Absent  => "danger",
+                                        EmpSystem.Models.AttendanceStatus.Leave   => "warning",
+                                        _                                          => "secondary"
+                                    };
+                                }
+                                <span class="badge text-bg-@badge rounded-pill px-3 py-1">@item.Status</span>
+                            </td>
+                            <td class="text-end px-4">
+                                <a asp-action="Details" asp-route-id="@item.AttendanceId"
+                                   class="btn btn-sm btn-outline-secondary me-1">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@item.AttendanceId"
+                                   class="btn btn-sm btn-outline-primary me-1">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@item.AttendanceId"
+                                   class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-muted">
+                                <i class="bi bi-calendar-x fs-2 d-block mb-2"></i>
+                                No attendance records found.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

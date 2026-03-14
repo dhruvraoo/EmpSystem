@@ -1,128 +1,115 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using EmpSystem.Models;
 using EmpSystem.Repository;
 using EmpSystem.ViewModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Data.SqlClient;
 
 namespace EmpSystem.Controllers;
 
-public class EmployeeController: Controller 
+[Authorize]
+public class EmployeeController : Controller
 {
     private readonly IEmployeeRepository _employeeRepository;
-    
-    public EmployeeController(IEmployeeRepository employeeRepository) 
+
+    public EmployeeController(IEmployeeRepository employeeRepository)
     {
         _employeeRepository = employeeRepository;
     }
- public async Task<IActionResult> Index(string searchString, string sortOrder, int pageNumber, string currentFilter)
+
+    public async Task<IActionResult> Index(string searchString, string sortOrder, int pageNumber, string currentFilter)
+    {
+        ViewData["CurrentSort"] = sortOrder;
+        ViewData["NameSortParam"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+        ViewData["DateOfBirthSortParm"] = sortOrder == "date_asc" ? "date_desc" : "date_asc";
+        ViewData["IsActiveSortParam"] = sortOrder == "isactive_asc" ? "isactive_desc" : "isactive_asc";
+
+        if (searchString != null)
+            pageNumber = 1;
+        else
+            searchString = currentFilter;
+
+        ViewData["CurrentFilter"] = searchString;
+
+        var employees = _employeeRepository.GetAllAsync();
+
+        if (!string.IsNullOrEmpty(searchString))
+            employees = employees.Where(e => e.FirstName.Contains(searchString) || e.LastName.Contains(searchString));
+
+        employees = sortOrder switch
         {
-            ViewData["CurrentSort"] = sortOrder;
-            //Sorting
-            ViewData["NameSortParam"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
-            ViewData["DateOfBirthSortParm"] = sortOrder == "date_asc" ? "date_desc" : "date_asc";
-            ViewData["IsActiveSortParam"] = sortOrder == "isactive_asc" ? "isactive_desc" : "isactive_asc";
-            if (searchString != null)
-            {
-                pageNumber = 1;
-            }
-            else
-            {
-                searchString = currentFilter;
-            }
+            "name_desc"     => employees.OrderByDescending(e => e.FirstName),
+            "date_asc"      => employees.OrderBy(e => e.DateOfBirth),
+            "date_desc"     => employees.OrderByDescending(e => e.DateOfBirth),
+            "isactive_desc" => employees.OrderByDescending(e => e.IsActive),
+            "isactive_asc"  => employees.OrderBy(e => e.IsActive),
+            _               => employees.OrderBy(e => e.FirstName)
+        };
 
-            ViewData["CurrentFilter"] = searchString;
-
-            var employees =  _employeeRepository.GetAllAsync();
-
-            // Search functionality
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                employees = employees.Where(e => e.FirstName.Contains(searchString) || e.LastName.Contains(searchString));
-            }
-
-            switch (sortOrder)
-            {
-                case "name_desc":
-                    employees = employees.OrderByDescending(e => e.FirstName);
-                    break;
-
-                case "date_asc":
-                    employees = employees.OrderBy(s => s.DateOfBirth);
-                    break;
-                case "date_desc":
-                    employees = employees.OrderByDescending(s => s.DateOfBirth);
-                    break;
-                case "isactive_desc":
-                    employees = employees.OrderByDescending(e => e.IsActive);
-                    break;
-                case "isactive_asc":
-                    employees = employees.OrderBy(e => e.IsActive);
-                    break;
-
-                default:
-                    employees = employees.OrderBy(e => e.FirstName);
-                    break;
-            }
-
-            // Ensure pageNumber is at least 1
-            if (pageNumber < 1)
-            {
-                pageNumber = 1;
-            }
-
-            int pageSize = 5;
-            return View(await PaginatedList<EmployeeViewModal>.CreateAsync(employees, pageNumber, pageSize));
-
-        }
+        if (pageNumber < 1) pageNumber = 1;
+        int pageSize = 5;
+        return View(await PaginatedList<EmployeeViewModal>.CreateAsync(employees, pageNumber, pageSize));
+    }
 
     [HttpGet]
     public async Task<IActionResult> Add()
     {
-        var departments = await _employeeRepository.GetAllDepartmentsAsync();
-        
-        ViewBag.Departments = new SelectList(departments, "DepartmentId", "DepartmentName");
+        await PopulateDepartmentDropdownAsync();
         return View();
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Add(EmployeeViewModal model)
     {
         if (!ModelState.IsValid)
         {
+            await PopulateDepartmentDropdownAsync();
             return View(model);
         }
         await _employeeRepository.AddAsync(model);
-        return RedirectToAction("Index",  "Employee");
+        return RedirectToAction(nameof(Index));
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> Edit(int id)
     {
-        var departments = await _employeeRepository.GetAllDepartmentsAsync();
-        ViewBag.Departments = new SelectList(departments, "DepartmentId", "DepartmentName");
-        
+        await PopulateDepartmentDropdownAsync();
         var employee = await _employeeRepository.GetByIdAsync(id);
         return View(employee);
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(EmployeeViewModal employee)
     {
         if (!ModelState.IsValid)
         {
+            await PopulateDepartmentDropdownAsync();
             return View(employee);
         }
-
         await _employeeRepository.UpdateAsync(employee);
-        return RedirectToAction("Index",  "Employee");
+        return RedirectToAction(nameof(Index));
     }
 
     [HttpGet]
     public async Task<IActionResult> Delete(int id)
     {
         await _employeeRepository.DeleteAsync(id);
-        return RedirectToAction("Index",  "Employee");
+        return RedirectToAction(nameof(Index));
     }
-}
+
+    // ── Helpers ─────────────────────────────────────────────────────────────
+
+    private async Task PopulateDepartmentDropdownAsync(int? selectedId = null)
+    {
+        var departments = await _employeeRepository.GetAllDepartmentsAsync();
+
+        // HR users cannot assign employees to the HR department
+        if (User.IsInRole("HR"))
+            departments = departments.Where(d =>
+                !d.DepartmentName.Equals("HR", StringComparison.OrdinalIgnoreCase)).ToList();
+
+        ViewBag.Departments = new SelectList(departments, "DepartmentId", "DepartmentName", selectedId);
+    }
+}
